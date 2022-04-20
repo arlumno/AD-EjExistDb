@@ -42,7 +42,20 @@ public class ADEjExistDb {
 //                while (resultQ.next()) {
 //                    System.out.println(resultQ.getItemAsString(null));
 //                }
+//              
+    
+                query = "//bib/libro";
+                System.out.println("--- Todos los libros: ---");
+                System.out.println(consultarXQuery(query, conexion));
+                
+                query = "count(//bib/libro)";
+                System.out.println("--- Numero de libros: ---");
+                System.out.println(consultarXQuery(query, conexion));
+           
+                query = "//bib/count(libro)";                
+                System.out.println(consultarXQuery(query, conexion));
 //                
+                System.out.println("--- Consultas Extra: ---");
                 query = "for $libro in /bib/libro\n"
                         + "	let $year := $libro/@año, $titulo := $libro/titulo order by  $libro/@año\n"
                         + "	return \n"
