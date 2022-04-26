@@ -22,7 +22,10 @@ public class ADEjExistDb {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        XQConnection conexion = connectionExistDb();
+        ejercicioXPATH();
+    }
+    public static void ejercicioXPATH(){
+        XQConnection conexion = conexXQJ();
         String query;
         if (conexion != null) {
             try {
@@ -95,7 +98,8 @@ public class ADEjExistDb {
         }
     }
 
-    public static XQConnection connectionExistDb() {
+    
+    public static XQConnection conexXQJ() {
         try {
             XQDataSource server = new ExistXQDataSource();
             server.setProperty("serverName", "localhost");
