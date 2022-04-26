@@ -35,25 +35,22 @@ public class ADEjExistDb {
                         + "\n*************************************************************\n\n"
                 );
 
-//                XQExpression q = conexion.createExpression();
-//                XQResultSequence resultQ = q.executeQuery(query);
-//                XQResultSequence resultQ = conexion.createExpression().executeQuery(query);
-//
-//                while (resultQ.next()) {
-//                    System.out.println(resultQ.getItemAsString(null));
-//                }
-//              
     
                 query = "//bib/libro";
                 System.out.println("--- Todos los libros: ---");
                 System.out.println(consultarXQuery(query, conexion));
                 
+                query = "//bib/libro/titulo/string()";
+                System.out.println("--- Todos los libros (titulos): ---");
+                System.out.println(consultarXQuery(query, conexion));
+                
+                
                 query = "count(//bib/libro)";
                 System.out.println("--- Numero de libros: ---");
                 System.out.println(consultarXQuery(query, conexion));
-           
-                query = "//bib/count(libro)";                
-                System.out.println(consultarXQuery(query, conexion));
+//           
+//                query = "//bib/count(libro)";                
+//                System.out.println(consultarXQuery(query, conexion));
 //                
                 System.out.println("--- Consultas Extra: ---");
                 query = "for $libro in /bib/libro\n"
