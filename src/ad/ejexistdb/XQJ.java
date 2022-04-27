@@ -22,7 +22,7 @@ public class XQJ {
             server.setProperty("serverName", "localhost");
             server.setProperty("port", "8080");
             server.setProperty("user", "admin");
-            server.setProperty("password", "");
+            server.setProperty("password", "");            
             return server.getConnection();
         } catch (XQException ex) {
 

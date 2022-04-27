@@ -5,6 +5,8 @@
 package ad.ejexistdb;
 
 import static ad.ejexistdb.ADEjExistDb.conexXQJ;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.xquery.XQConnection;
 import javax.xml.xquery.XQException;
 import javax.xml.xquery.XQMetaData;
@@ -97,67 +99,73 @@ class AccionesApp {
     }
 
     public void ejercicioXMLDB() {
-        Collection col = null;
+        Collection colBase = null;
+        String query;
         try {
             StringBuilder info = new StringBuilder();
-            col = XMLDB.obtenColeccion("/ColeccionesXML");
-            info.append("\n" + "Colección actual: " + col.getName());
+            colBase = XMLDB.obtenColeccion("/ColeccionesXML");
+            info.append("\n" + "Colección actual: " + colBase.getName());
 
-            int numDocs = col.getResourceCount();
+            int numDocs = colBase.getResourceCount();
             info.append("\n" + numDocs + " documentos.");
             if (numDocs > 0) {
-                String nomDocs[] = col.listResources();
+                String nomDocs[] = colBase.listResources();
                 for (int i = 0; i < numDocs; i++) {
                     info.append("\n" + "\t" + nomDocs[i]);
                 }
             }
 
-            Service servicios[] = col.getServices();
-            info.append("\n" + "Servicios proporcionados por colección " + col.getName() + ":");
+            Service servicios[] = colBase.getServices();
+            info.append("\n" + "Servicios proporcionados por colección " + colBase.getName() + ":");
             for (int i = 0; i < servicios.length; i++) {
                 info.append("\n" + "\t" + servicios[i].getName() + " - Versión: " + servicios[i].getVersion());
             }
 
 //            System.out.println(info.toString());
             //ver empleados
-            String query = "for $emp in /EMPLEADOS/EMP_ROW[DEPT_NO = 10] return $emp";
-            System.out.println("\n********** Ver empleados 10 **********");
-            System.out.println(XMLDB.consultarQueryService(query, col));
+            query = "for $emp in /EMPLEADOS/EMP_ROW[DEPT_NO = 10] return $emp";
+            System.out.println("\n**********1. Ver empleados 10 **********");
+            System.out.println(XMLDB.consultarQueryService(query, colBase));
 
+            System.out.println("\n**********2.1 Ver colecciones **********");
+            verColecciones(colBase);
             //ver colecciones
-            System.out.println("\n********** Ver colecciones **********");
-            System.out.println("Colección actual: " + col.getName());
-            System.out.println(col.getChildCollectionCount() + " colecciones hijas.");
-//            String nomHijas[] = col.listChildCollections();
-            for (String coleccion : col.listChildCollections()) {
-                System.out.println("\t" + coleccion);
-            }
 
             //ver recursos de las colecciones
-            System.out.println("\n********** Ver recursos colecciones **********");
-            System.out.println("Colección actual: " + col.getName());
-//            numDocs = col.getResourceCount();
-            System.out.println(numDocs + " documentos.");
-            for (String coleccion : col.listChildCollections()) {
-                System.out.println("\t" + coleccion + " (" + col.getChildCollection(coleccion).getResourceCount() + ")");
-                for (String recurso : col.getChildCollection(coleccion).listResources()) {
-                    System.out.println("\t\t" + recurso);
-                }
+            System.out.println("\n**********2.2 Ver recursos colecciones **********");
+            verRecursos(colBase);
 
-            }
-//            if (numDocs > 0) {
-//                String nomDocs[] = col.listResources();
-//                for (int i = 0; i < numDocs; i++) {
-//                    System.out.println("\t" + nomDocs[i]);
-//                }
-//            }
+            System.out.println("\n**********3.1 Crear coleccion **********");
+            XMLDB.consultarManagementService("ejemploCreacion", XMLDB.CREATE_COLLECTION, colBase);
+            verColecciones(colBase);
+
+            System.out.println("\n**********3.2 Subir Fichero**********");
+            Collection colAux = colBase.getChildCollection("ejemploCreacion");
+            XMLDB.consultarManagementService("ejemploSubirArchivo.xml", XMLDB.UPLOAD_RESOURCE, colAux);
+            verRecursos(colAux);
+
+            System.out.println("\n**********3.3 Borrar Fichero**********");
+            XMLDB.consultarManagementService("ejemploSubirArchivo.xml", XMLDB.DELETE_RESOURCE, colAux);
+            verRecursos(colAux);
+
+            System.out.println("\n**********3.4 Borrar Colección**********");
+            XMLDB.consultarManagementService("ejemploCreacion", XMLDB.DELETE_COLLECTION, colBase);
+            verColecciones(colBase);
+
+            System.out.println("\n**********7. Actualizar Stock Productos **********");
+            colAux = colBase.getChildCollection("ColeccionPruebas");
+            query = "for $producto in /productos/produc\n" +
+                    "let $stock :=  $producto/stock_actual \n" +
+                    "return update value $producto/stock_actual with $stock+1";
+            XMLDB.consultarQueryService(query, colAux);
+            System.out.println(XMLDB.consultarQueryService("//productos/produc/stock_actual/", colAux));
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
-                if (col != null) {
-                    col.close();
+                if (colBase != null) {
+                    colBase.close();
                 }
             } catch (XMLDBException e) {
                 e.printStackTrace();
@@ -165,6 +173,53 @@ class AccionesApp {
         }
     }
 
+    private void verRecursos(Collection col) throws XMLDBException {
+        System.out.println("Colección actual: " + col.getName());
+//            numDocs = col.getResourceCount();
+        System.out.println(col.getResourceCount() + " documentos.");
+        for (String coleccion : col.listChildCollections()) {
+            System.out.println("\t" + coleccion + " (" + col.getChildCollection(coleccion).getResourceCount() + ")");
+            for (String recurso : col.getChildCollection(coleccion).listResources()) {
+                System.out.println("\t\t" + recurso);
+            }
+
+        }
+    }
+
+    private void verColecciones(Collection col) throws XMLDBException {
+        System.out.println("Colección actual: " + col.getName());
+        System.out.println(col.getChildCollectionCount() + " colecciones hijas.");
+//            String nomHijas[] = col.listChildCollections();
+        for (String coleccion : col.listChildCollections()) {
+            System.out.println("\t" + coleccion);
+        }
+    }
+
     public void ejercicioXQJ() {
+        XQConnection conexion = conexXQJ();
+        String query;
+        StringBuilder resultado = new StringBuilder();
+        String coleccion = "collection('/db/ColeccionesXML/ColeccionPruebas')";
+        try {
+            if (conexion != null) {
+
+                System.out.println("\n**********1. Ver Productos **********");
+                query = coleccion + "/productos/produc";
+                System.out.println(XQJ.consultarXQuery(query, conexion));
+                
+                System.out.println("\n**********2. Contar Productos **********");
+                query = coleccion + "/productos/count(produc[precio > 50])";
+                System.out.println(XQJ.consultarXQuery(query, conexion));
+                
+//                System.out.println("\n**********3. Productos por zona **********");
+//                query = coleccion + "for $zonas /productos/count(produc[precio > 50])";
+//                System.out.println(XQJ.consultarXQuery(query, conexion));
+
+            }
+
+        } catch (XQException ex) {
+            ex.printStackTrace();
+
+        }
     }
 }
