@@ -48,4 +48,6 @@ public class XQJ {
         resultado.append("*****************************\n");
         return resultado.toString();
     }
+    
+    
 }

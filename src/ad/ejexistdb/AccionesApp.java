@@ -4,9 +4,8 @@
  */
 package ad.ejexistdb;
 
-import static ad.ejexistdb.ADEjExistDb.conexXQJ;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static ad.ejexistdb.XQJ.conexXQJ;
+import java.io.File;
 import javax.xml.xquery.XQConnection;
 import javax.xml.xquery.XQException;
 import javax.xml.xquery.XQMetaData;
@@ -16,8 +15,7 @@ import org.xmldb.api.base.ResourceIterator;
 import org.xmldb.api.base.ResourceSet;
 import org.xmldb.api.base.Service;
 import org.xmldb.api.base.XMLDBException;
-import org.xmldb.api.modules.XPathQueryService;
-import textos.SalidasGui;
+import utilidades.Utils;
 
 /**
  *
@@ -29,6 +27,9 @@ class AccionesApp {
         XQConnection conexion = conexXQJ();
         String query;
         StringBuilder resultado = new StringBuilder();
+        System.out.println("\n************************************************************************");
+        System.out.println("******************************* XPATH **********************************");
+        System.out.println("************************************************************************\n");
         if (conexion != null) {
             try {
                 XQMetaData xqmd = conexion.getMetaData();
@@ -101,6 +102,9 @@ class AccionesApp {
     public void ejercicioXMLDB() {
         Collection colBase = null;
         String query;
+        System.out.println("\n************************************************************************");
+        System.out.println("******************************* XMLDB **********************************");
+        System.out.println("************************************************************************\n");
         try {
             StringBuilder info = new StringBuilder();
             colBase = XMLDB.obtenColeccion("/ColeccionesXML");
@@ -155,10 +159,12 @@ class AccionesApp {
             System.out.println("\n**********7. Actualizar Stock Productos **********");
             colAux = colBase.getChildCollection("ColeccionPruebas");
             query = "for $producto in /productos/produc\n" +
-                    "let $stock :=  $producto/stock_actual \n" +
-                    "return update value $producto/stock_actual with $stock+1";
+                    "let $stock :=  $producto/stock_actual\n" +
+                    "return update value $producto/stock_actual with $stock+10  ";
             XMLDB.consultarQueryService(query, colAux);
-            System.out.println(XMLDB.consultarQueryService("//productos/produc/stock_actual/", colAux));
+            System.out.println(XMLDB.consultarQueryService("//productos/produc/stock_actual", colAux));
+            
+            
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -200,6 +206,11 @@ class AccionesApp {
         String query;
         StringBuilder resultado = new StringBuilder();
         String coleccion = "collection('/db/ColeccionesXML/ColeccionPruebas')";
+        
+        System.out.println("\n************************************************************************");
+        System.out.println("******************************** XQJ ***********************************");
+        System.out.println("************************************************************************\n");
+        
         try {
             if (conexion != null) {
 
@@ -211,10 +222,20 @@ class AccionesApp {
                 query = coleccion + "/productos/count(produc[precio > 50])";
                 System.out.println(XQJ.consultarXQuery(query, conexion));
                 
-//                System.out.println("\n**********3. Productos por zona **********");
-//                query = coleccion + "for $zonas /productos/count(produc[precio > 50])";
+                System.out.println("\n**********3. Productos por zona **********");
+                query = "for $zona in distinct-values("+coleccion+"/productos//cod_zona/data())\n" +
+                                    "let $productosZona := count("+coleccion+"/productos/produc[cod_zona = $zona])\n" +
+                                    "return $productosZona";
+                System.out.println(XQJ.consultarXQuery(query, conexion));
+                
+                                                
+                System.out.println("\n**********4. Consulta desde fichero **********");
+                query = Utils.leerArchivo(new File("src/ad/ejexistdb/miconsulta.xq"));   // pasa un archivo a string.             
+                System.out.println(XQJ.consultarXQuery(query, conexion));
+                
+//                System.out.println("\n**********5. Crear empleado 10 **********");
+//                query = coleccion + "";
 //                System.out.println(XQJ.consultarXQuery(query, conexion));
-
             }
 
         } catch (XQException ex) {
