@@ -46,8 +46,8 @@ public class App {
             app.ejercicioXPATH();
         });
         
-        menu.addLabel("Ejercicios XMLB y XQJ");
-        menu.addOpcion("ejercicio XMLB", () -> {
+        menu.addLabel("Ejercicios XMLDB y XQJ");
+        menu.addOpcion("ejercicio XMLDB", () -> {
             app.ejercicioXMLDB();
         });
  
