@@ -245,6 +245,10 @@ class AccionesApp {
                 System.out.println("\n**********5. Crear empleado 10 **********");
                 query = "for $emp in //EMP_ROW[DEPT_NO = 10] return <EMPLEADOS> {$emp} </EMPLEADOS>";
                 XQJ.guardarArchivoConsulta("NUEVO_EMPLE10.xml ",query, conexion);
+                
+                System.out.println("\n**********6. Mostar productos.xml **********");
+                query = "//productos";
+                System.out.println(XQJ.consultarXQuery(query, conexion));
             }
 
         } catch (XQException ex) {
